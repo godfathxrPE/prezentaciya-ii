@@ -1925,35 +1925,30 @@ body.no-person .ct-meta{grid-template-columns:repeat(2,1fr);max-width:640px}
   </div>
 </div>
 
+<!-- Контакты менеджеров — отдельный файл, правится без захода в этот. -->
+<script src="people.js"></script>
 <script>
-/* ══════════════════════════════════════════════════════════════
-   КОНТАКТЫ — единственное место, где они заданы.
-
-   Ссылка для клиента:  https://<домен>/gutina
-   Локальный файл:      index.html?c=gutina
-   Без ключа:           нейтральный вариант, без ФИО и личных контактов.
-
-   Добавить человека — добавить строку сюда И ключ в vercel.json → rewrites.
-   ══════════════════════════════════════════════════════════════ */
-var PEOPLE = {
-  datsenko: { name:'Юрий Даценко',   role:'Менеджер проектов<br>Первый БИТ, Санкт-Петербург',
-              phone:'+7 995 236 40 50', email:'UGDatsenko@1cbit.ru', tg:'@Yuri_Datsenko' },
-  gutina:   { name:'Людмила Гутина', role:'Менеджер проектов<br>Первый БИТ, Санкт-Петербург',
-              phone:'+7 993 645 10 38', email:'lmgutina@1cbit.ru',   tg:'@Lgutina' }
-};
-
 (function(){
-  var q=null;
-  try{ q=new URLSearchParams(location.search).get('c'); }catch(e){}
-  var seg=(location.pathname.split('/').filter(Boolean).pop()||'').replace(/\.html?$/i,'');
-  var key=String(q||seg||'').toLowerCase(), p=PEOPLE[key];
-  document.body.classList.toggle('no-person', !p);
-  if(!p) return;
-  document.querySelectorAll('[data-p]').forEach(function(el){
-    var v=p[el.getAttribute('data-p')];
-    if(v!=null) el.innerHTML=v;
-  });
-  document.title=document.title;
+  /* Подставляет контакты на слайд 34 по ключу из ссылки:
+     /gutina  (нужен rewrite в vercel.json)  либо  ?c=gutina  (работает везде).
+     Нет ключа, нет такого ключа, не загрузился people.js — показывается
+     нейтральный вариант без ФИО. Дек при этом работает как обычно. */
+  try{
+    var people = (typeof PEOPLE==='object' && PEOPLE) ? PEOPLE : {};
+    var q=null;
+    try{ q=new URLSearchParams(location.search).get('c'); }catch(e){}
+    var seg=(location.pathname.split('/').filter(Boolean).pop()||'').replace(/\.html?$/i,'');
+    var p=people[String(q||seg||'').toLowerCase()];
+    document.body.classList.toggle('no-person', !p);
+    if(!p) return;
+    document.querySelectorAll('[data-p]').forEach(function(el){
+      var v=p[el.getAttribute('data-p')];
+      if(v!=null) el.innerHTML=v;
+    });
+  }catch(err){
+    document.body.classList.add('no-person');
+    if(window.console) console.warn('Контакты не подставились:', err);
+  }
 })();
 </script>
 
